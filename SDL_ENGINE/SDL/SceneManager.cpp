@@ -6,7 +6,6 @@ SceneManager::SceneManager()
 {
 }
 
-
 SceneManager::~SceneManager()
 {
 }
@@ -20,15 +19,13 @@ void SceneManager::update()
 	if (!m_sceneStack.empty()) {
 		m_sceneStack.back()->update();
 	}
-	applyAwaitingChanges();
 }
 void SceneManager::render(SDL_Renderer * renderer)
 {
 	if (!m_sceneStack.empty()) {
-		for (const auto& itr : m_sceneStack) {
-			itr->render(renderer);
-		}
+		m_sceneStack.back()->update();
 	}
+	applyAwaitingChanges();
 }
 
 void SceneManager::pushScene(SceneID::ID scene)

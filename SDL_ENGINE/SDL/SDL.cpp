@@ -15,6 +15,5 @@ int main(int argc, char** argv)
 	app.setUp();
 	app.loop();
 	app.cleanUp();
-
 	return 0;
 }

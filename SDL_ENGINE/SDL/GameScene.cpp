@@ -32,17 +32,17 @@ void GameScene::onEnter()
 
 void GameScene::onExit()
 {
-	getContext()->eventHandler.removeCallback(SceneID::Game);
+	getContext()->eventHandler.removeCallback(SceneID::Title);
 	std::cout << "Leaving Game Scene" << std::endl;
 }
 
-void GameScene::add()
+void GameScene::add(EventInfo * eventInfo)
 {
 	requestPopScene();
 	requestPushScene(SceneID::Title);
 }
 
-void GameScene::exit()
+void GameScene::exit(EventInfo * eventInfo)
 {
 	requestClearScene();
 }
