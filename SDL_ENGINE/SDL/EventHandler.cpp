@@ -7,6 +7,8 @@
 
 EventHandler::EventHandler()
 {
+	// Move to init function
+	// <
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 	SDL_JoystickEventState(SDL_ENABLE);
 
@@ -15,6 +17,7 @@ EventHandler::EventHandler()
 		SDL_Joystick * joypad = SDL_JoystickOpen(i);
 	}
 	loadBindings();
+	//>
 }
 
 EventHandler::~EventHandler()
@@ -34,11 +37,11 @@ bool EventHandler::loadBindings()
 	{
 		if (line[0] != delimOne) {
 			std::stringstream ss(line);
-			int command, scene, action, key = 0;
+			int command, action, key = 0;
 			std::vector<std::unique_ptr<EventInfo>> bindings;
 			ss >> command;
-			while (ss >> scene >> delimTwo >> action >> delimTwo >> key) {
-				bindings.emplace_back(std::make_unique<EventInfo>(EventInfo{ scene, action, key }));
+			while (ss >> action >> delimTwo >> key) {
+				bindings.emplace_back(std::make_unique<EventInfo>(EventInfo{ action, key }));
 			}
 			addBinding(static_cast<Command::ID>(command), std::move(bindings));
 		}
@@ -55,53 +58,50 @@ bool EventHandler::addBinding(Command::ID name, std::vector<std::unique_ptr<Even
 	return false;
 }
 
-bool EventHandler::removeBinding(Command::ID commandID)
+void EventHandler::removeBinding()
 {
-	auto itr = m_bindings.find(commandID);
-	if (itr == m_bindings.end()) { 
-		return false; 
-	}
-	m_bindings.erase(itr);
-	return true;
+	m_bindings.clear();
 }
 
 void EventHandler::HandleEvent(SceneID::ID sceneID, SDL_Event& e)
 {
+	// Look into cleaning this up its a fucking mess.
+	// Simplify
 	while (SDL_PollEvent(&e) != 0) {
 		for (auto& b_itr : m_bindings) {
 			for (auto& e_itr : b_itr.second){
 				EventInfo* eventInfo = e_itr.get();
-				if (sceneID == eventInfo->m_sceneID) {
-					switch (e.type) {
-					case SDL_KEYDOWN:
-						if (e.type == eventInfo->m_eventType
-							&& eventInfo->m_keyCode == e.key.keysym.scancode) {
-							m_commands.push_back(b_itr.first);
-						}
-						break;
-					case SDL_JOYBUTTONDOWN:
-						if (e.type == eventInfo->m_eventType
-							&& eventInfo->m_keyCode == e.jbutton.button) {
-							m_commands.push_back(b_itr.first);
-						}
-						break;
-					case SDL_JOYHATMOTION:
-						if ( e.type == eventInfo->m_eventType
-							&& eventInfo->m_keyCode == e.jhat.value) {
-							m_commands.push_back(b_itr.first);
-						}
-						break;
+				switch (e.type) {
+				case SDL_KEYDOWN:
+					if (e.type == eventInfo->m_eventType
+						&& eventInfo->m_keyCode == e.key.keysym.scancode) {
+						m_commands.push_back(b_itr.first);
 					}
+					break;
+				case SDL_JOYBUTTONDOWN:
+					if (e.type == eventInfo->m_eventType
+						&& eventInfo->m_keyCode == e.jbutton.button) {
+						m_commands.push_back(b_itr.first);
+					}
+					break;
+				case SDL_JOYHATMOTION:
+					if ( e.type == eventInfo->m_eventType
+						&& eventInfo->m_keyCode == e.jhat.value) {
+						m_commands.push_back(b_itr.first);
+					}
+					break;
 				}
 			}
 		}  
 	}  
-
+	// Check to see it you are in the correct scene before executing commands
 	for (const auto& itr : m_commands) {
-		auto stateCallbacks = m_callbacks.find(sceneID);
-		auto callItr = stateCallbacks->second.find(itr);
-		if (callItr != stateCallbacks->second.end()) {
-			callItr->second();
+		auto sceneCallbacks = m_callbacks.find(sceneID);
+		if (sceneCallbacks != m_callbacks.end()) {
+			auto callbackItr = sceneCallbacks->second.find(itr);
+			if (callbackItr != sceneCallbacks->second.end()) {
+				callbackItr->second();
+			}
 		}
 	}
 	m_commands.clear();

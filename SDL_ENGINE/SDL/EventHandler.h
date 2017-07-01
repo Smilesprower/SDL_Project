@@ -9,12 +9,10 @@
 
 
 struct EventInfo {
-	int m_sceneID;
 	int m_eventType;
 	int m_keyCode;
-	EventInfo(const int sceneID, const int eventType, const int keyCode)
-		: m_sceneID(sceneID)
-		, m_eventType(eventType)
+	EventInfo(const int eventType, const int keyCode)
+		: m_eventType(eventType)
 		, m_keyCode(keyCode)
 	{}
 };
@@ -31,7 +29,7 @@ public:
 
 	bool loadBindings();
 	bool addBinding(Command::ID name, std::vector<std::unique_ptr<EventInfo>> eventInfo);
-	bool removeBinding(Command::ID name);
+	void removeBinding();
 
 	void HandleEvent(SceneID::ID sceneID, SDL_Event& e);
 

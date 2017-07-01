@@ -22,6 +22,7 @@ void TitleScene::render(SDL_Renderer* renderer)
 void TitleScene::onEnter()
 {
 	getContext()->eventHandler.addCallback(SceneID::Title, Command::JUMP, &TitleScene::add, this);
+	getContext()->eventHandler.addCallback(SceneID::Title, Command::QUIT, &TitleScene::exit, this);
 	std::cout << "Entering Title Scene" << std::endl;
 }
 
@@ -35,4 +36,9 @@ void TitleScene::add()
 {
 	requestPopScene();
 	requestPushScene(SceneID::Game);
+}
+
+void TitleScene::exit()
+{
+	requestClearScene();
 }

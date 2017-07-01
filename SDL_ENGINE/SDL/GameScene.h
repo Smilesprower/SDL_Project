@@ -15,7 +15,7 @@ public:
 	void onEnter();
 	void onExit();
 
-	void add();
-
+	void add();  // TO BE REMOVED
+	void exit(); // TO BE REMOVED
 private:
 };
