@@ -6,6 +6,8 @@
 #include <string>
 
 EventHandler::EventHandler()
+	: m_currentCommand(Command::NONE)
+	, m_currentEvent(nullptr)
 {
 	// Move to init function
 	// <
@@ -55,20 +57,10 @@ bool EventHandler::addBinding(const Command::ID name, std::vector<std::unique_pt
 	if (m_bindings.find(name) != m_bindings.end())
 		return false;
 	return m_bindings.emplace(name, std::move(eventInfo)).second;
-	return false;
-}
-
-void EventHandler::removeBinding()
-{
-	m_bindings.clear();
 }
 
 void EventHandler::HandleEvent(const SceneID::ID sceneID, SDL_Event& e)
 {
-	// This will not work change back to original idea;
-
-	EventInfo * eventInfo = nullptr;
-
 	while (SDL_PollEvent(&e) != 0) {
 		switch (e.type) {
 		case SDL_KEYDOWN:
@@ -99,26 +91,19 @@ void EventHandler::HandleEvent(const SceneID::ID sceneID, SDL_Event& e)
 			handleSDLQuitEvent(e);
 			break;
 		}
-	}  
-	// Check to see it you are in the correct scene before executing commands
-	for (const auto& itr : m_commands) {
-		auto sceneCallbacks = m_callbacks.find(sceneID);
-		if (sceneCallbacks != m_callbacks.end()) {
-			auto callbackItr = sceneCallbacks->second.find(itr.first);
-			if (callbackItr != sceneCallbacks->second.end()) {
-				callbackItr->second(itr.second);
+		if (m_currentEvent != nullptr) {
+			auto sceneCallbacks = m_callbacks.find(sceneID);
+			if (sceneCallbacks != m_callbacks.end()) {
+				auto callbackItr = sceneCallbacks->second.find(m_currentCommand);
+				if (callbackItr != sceneCallbacks->second.end()) {
+					callbackItr->second(m_currentEvent);
+				}
 			}
 		}
-		//auto defaultCallbacks = m_callbacks.find(SceneID::None);
-		//if (defaultCallbacks != m_callbacks.end()) {
-		//	auto callbackItr = defaultCallbacks->second.find(itr.first);
-		//	if (callbackItr != defaultCallbacks->second.end()) {
-		//		callbackItr->second(itr.second);
-		//	}
-		//}
+		// Reset incase command was found in a different scene
+		m_currentEvent = nullptr;
+		m_currentCommand = Command::NONE;
 	}
-
-	m_commands.clear();
 }
 
 void EventHandler::handleKeyDownEvent(SDL_Event & e)
@@ -147,7 +132,8 @@ void EventHandler::handleJoyButtonDownEvent(SDL_Event & e)
 		for (auto& eventItr : bindItr.second) {
 			EventInfo* eventInfo = eventItr.get();
 			if (e.type == eventInfo->m_eventType && eventInfo->m_keyCode == e.jbutton.button) {
-				m_commands.emplace_back(std::make_pair(bindItr.first, eventInfo));
+				m_currentCommand = bindItr.first;
+				m_currentEvent = eventInfo;
 			}
 		}
 	}
@@ -161,7 +147,8 @@ void EventHandler::handleMouseMotionEvent(SDL_Event & e)
 			if (e.type == eventInfo->m_eventType) {
 				eventInfo->m_mousePos.x = e.motion.x;
 				eventInfo->m_mousePos.y = e.motion.y;
-				m_commands.emplace_back(std::make_pair(bindItr.first, eventInfo));
+				m_currentCommand = bindItr.first;
+				m_currentEvent = eventInfo;
 			}
 		}
 	}
@@ -183,7 +170,8 @@ void EventHandler::handleSDLQuitEvent(SDL_Event & e)
 		for (auto& eventItr : bindItr.second) {
 			EventInfo* eventInfo = eventItr.get();
 			if (e.type == eventInfo->m_eventType) {
-				m_commands.emplace_back(std::make_pair(bindItr.first, eventInfo));
+				m_currentCommand = bindItr.first;
+				m_currentEvent = eventInfo;
 			}
 		}
 	}

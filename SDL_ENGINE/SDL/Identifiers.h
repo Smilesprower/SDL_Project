@@ -4,6 +4,7 @@ namespace Command
 {
 	enum ID
 	{
+		NONE,
 		JUMP,
 		MOVE,
 		MOVEUP,

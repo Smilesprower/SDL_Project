@@ -30,7 +30,6 @@ public:
 
 	bool loadBindings();
 	bool addBinding(const Command::ID name, std::vector<std::unique_ptr<EventInfo>> eventInfo);
-	void removeBinding();
 	bool removeCallback(const SceneID::ID sceneID);
 	void HandleEvent(const SceneID::ID sceneID, SDL_Event& e);
 
@@ -46,8 +45,7 @@ public:
 	void handleSDLQuitEvent(SDL_Event& e);
 
 	template<class T>
-	bool addCallback(const SceneID::ID sceneID, const Command::ID& name, void(T::*func)(EventInfo*), T* instance){
-		
+	bool addCallback(const SceneID::ID sceneID, const Command::ID& name, void(T::*func)(EventInfo*), T* instance) {
 		auto itr = m_callbacks.emplace(sceneID, CallbackContainer()).first;
 		auto temp = std::bind(func, instance, std::placeholders::_1);
 		return itr->second.emplace(name, temp).second;
@@ -55,7 +53,8 @@ public:
 
 
 private:
-	std::vector<std::pair<Command::ID, EventInfo*>> m_commands;
+	Command::ID m_currentCommand;
+	EventInfo * m_currentEvent;
 	Bindings m_bindings;
 	Callbacks m_callbacks;
 };

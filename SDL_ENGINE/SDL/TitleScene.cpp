@@ -34,6 +34,7 @@ void TitleScene::onExit()
 
 void TitleScene::add(EventInfo* eventInfo)
 {
+
 	requestPopScene();
 	requestPushScene(SceneID::Game);
 }
