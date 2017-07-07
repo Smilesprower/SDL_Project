@@ -6,8 +6,6 @@
 #include <string>
 
 EventHandler::EventHandler()
-	: m_currentCommand(Command::NONE)
-	, m_currentEvent(nullptr)
 {
 	// Move to init function
 	// <
@@ -59,120 +57,46 @@ bool EventHandler::addBinding(const Command::ID name, std::vector<std::unique_pt
 	return m_bindings.emplace(name, std::move(eventInfo)).second;
 }
 
-void EventHandler::HandleEvent(const SceneID::ID sceneID, SDL_Event& e)
-{
-	while (SDL_PollEvent(&e) != 0) {
-		switch (e.type) {
-		case SDL_KEYDOWN:
-			handleKeyDownEvent(e);
-			break;
-		case SDL_KEYUP:
-			handleKeyUpEvent(e);
-			break;
-		case SDL_JOYHATMOTION:
-			handleJoyHatMotionEvent(e);
-			break;
-		case SDL_JOYBUTTONDOWN:
-			handleJoyButtonDownEvent(e);
-			break;
-		case SDL_JOYBUTTONUP:
-			handleJoyButtonUpEvent(e);
-			break;
-		case SDL_MOUSEMOTION:
-			handleMouseMotionEvent(e);
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			handleMouseButtonDownEvent(e);
-			break;
-		case SDL_MOUSEBUTTONUP:
-			handleMouseButtonUpEvent(e);
-			break;
-		case SDL_QUIT:
-			handleSDLQuitEvent(e);
-			break;
-		}
-		if (m_currentEvent != nullptr) {
-			auto sceneCallbacks = m_callbacks.find(sceneID);
-			if (sceneCallbacks != m_callbacks.end()) {
-				auto callbackItr = sceneCallbacks->second.find(m_currentCommand);
-				if (callbackItr != sceneCallbacks->second.end()) {
-					callbackItr->second(m_currentEvent);
-				}
-			}
-		}
-		// Reset incase command was found in a different scene
-		m_currentEvent = nullptr;
-		m_currentCommand = Command::NONE;
-	}
-}
-
-void EventHandler::handleKeyDownEvent(SDL_Event & e)
-{
-
-}
-
-void EventHandler::handleKeyUpEvent(SDL_Event & e)
-{
-
-}
-
-void EventHandler::handleJoyButtonUpEvent(SDL_Event & e)
-{
-
-}
-
-void EventHandler::handleJoyHatMotionEvent(SDL_Event & e)
-{
-
-}
-
-void EventHandler::handleJoyButtonDownEvent(SDL_Event & e)
+void EventHandler::handleOneTimeEvent(const SceneID::ID sceneID, SDL_Event& e)
 {
 	for (auto& bindItr : m_bindings) {
 		for (auto& eventItr : bindItr.second) {
 			EventInfo* eventInfo = eventItr.get();
-			if (e.type == eventInfo->m_eventType && eventInfo->m_keyCode == e.jbutton.button) {
-				m_currentCommand = bindItr.first;
-				m_currentEvent = eventInfo;
+				switch (e.type) {
+				case SDL_KEYDOWN:
+					if (e.key.keysym.scancode == eventInfo->m_keyCode) {
+						callback(sceneID, bindItr.first, eventInfo);
+					} break;
 			}
 		}
 	}
 }
 
-void EventHandler::handleMouseMotionEvent(SDL_Event & e)
+void EventHandler::handleRealTimeEvent(const SceneID::ID sceneID)
 {
+	SDL_PumpEvents();
+	auto keyboardState = SDL_GetKeyboardState(nullptr);
+
 	for (auto& bindItr : m_bindings) {
 		for (auto& eventItr : bindItr.second) {
 			EventInfo* eventInfo = eventItr.get();
-			if (e.type == eventInfo->m_eventType) {
-				eventInfo->m_mousePos.x = e.motion.x;
-				eventInfo->m_mousePos.y = e.motion.y;
-				m_currentCommand = bindItr.first;
-				m_currentEvent = eventInfo;
+			switch (eventInfo->m_eventType) {
+				case RealTimeEvent::KEYBOARD:
+					if (keyboardState[eventInfo->m_keyCode]) {
+						callback(sceneID, bindItr.first, eventInfo);
+					} break;
 			}
 		}
 	}
 }
 
-void EventHandler::handleMouseButtonDownEvent(SDL_Event & e)
+void EventHandler::callback(SceneID::ID sceneID, const Command::ID command, EventInfo * eventInfo)
 {
-
-}
-
-void EventHandler::handleMouseButtonUpEvent(SDL_Event & e)
-{
-
-}
-
-void EventHandler::handleSDLQuitEvent(SDL_Event & e)
-{
-	for (auto& bindItr : m_bindings) {
-		for (auto& eventItr : bindItr.second) {
-			EventInfo* eventInfo = eventItr.get();
-			if (e.type == eventInfo->m_eventType) {
-				m_currentCommand = bindItr.first;
-				m_currentEvent = eventInfo;
-			}
+	auto sceneCallbacks = m_callbacks.find(sceneID);
+	if (sceneCallbacks != m_callbacks.end()) {
+		auto callbackItr = sceneCallbacks->second.find(command);
+		if (callbackItr != sceneCallbacks->second.end()) {
+			callbackItr->second(eventInfo);
 		}
 	}
 }

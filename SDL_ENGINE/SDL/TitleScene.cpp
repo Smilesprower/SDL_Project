@@ -34,9 +34,9 @@ void TitleScene::onExit()
 
 void TitleScene::add(EventInfo* eventInfo)
 {
-
-	requestPopScene();
-	requestPushScene(SceneID::Game);
+	std::cout << "Hello\n";
+	//requestPopScene();
+	//requestPushScene(SceneID::Game);
 }
 
 void TitleScene::exit(EventInfo* eventInfo)

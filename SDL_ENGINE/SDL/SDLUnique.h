@@ -14,9 +14,13 @@
 		void operator()(SDL_Window* ptr) { 
 			SDL_DestroyWindow(ptr); 
 		}
+		void operator()(SDL_Joystick* ptr) {
+			SDL_JoystickClose(ptr);
+		}
 	};
 	// Unique Pointers
 	using UniqueSDL_Surface = std::unique_ptr<SDL_Surface, SDL_Deleter>;
 	using UniqueSDL_Texture = std::unique_ptr<SDL_Texture, SDL_Deleter>;
 	using UniqueSDL_Renderer = std::unique_ptr<SDL_Renderer, SDL_Deleter>;
 	using UniqueSDL_Window = std::unique_ptr<SDL_Window, SDL_Deleter>;
+	using UniqueSDL_JoyStick = std::unique_ptr<SDL_Joystick, SDL_Deleter>;

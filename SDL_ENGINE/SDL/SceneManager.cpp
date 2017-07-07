@@ -10,9 +10,13 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::onEvent(SDL_Event & e)
+void SceneManager::handleOneTimeEvents(SDL_Event & e)
 {
-	m_context.eventHandler.HandleEvent(m_currentScenes.back(), e);
+	m_context.eventHandler.handleOneTimeEvent(m_currentScenes.back(), e);
+}
+void SceneManager::handleRealTimeEvents()
+{
+	m_context.eventHandler.handleRealTimeEvent(m_currentScenes.back());
 }
 void SceneManager::update()
 {

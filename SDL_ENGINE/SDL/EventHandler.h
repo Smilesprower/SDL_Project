@@ -3,10 +3,19 @@
 #include <unordered_map>
 #include <functional>
 #include <vector>
-#include <string>
 #include <memory>
 #include "Identifiers.h"
 
+namespace RealTimeEvent
+{
+	enum ID {
+		KEYBOARD = SDL_USEREVENT + 1,
+		MOUSE,
+		JOYSTICKBUTTONS,
+		JOYSTICKJHAT,
+		JOYSTICKANALOG
+	};
+}
 
 struct EventInfo {
 	int m_eventType;
@@ -31,18 +40,8 @@ public:
 	bool loadBindings();
 	bool addBinding(const Command::ID name, std::vector<std::unique_ptr<EventInfo>> eventInfo);
 	bool removeCallback(const SceneID::ID sceneID);
-	void HandleEvent(const SceneID::ID sceneID, SDL_Event& e);
-
-	// Check SDL Input Type
-	void handleKeyDownEvent(SDL_Event& e);
-	void handleKeyUpEvent(SDL_Event& e);
-	void handleJoyButtonUpEvent(SDL_Event& e);
-	void handleJoyHatMotionEvent(SDL_Event& e);
-	void handleJoyButtonDownEvent(SDL_Event& e);
-	void handleMouseMotionEvent(SDL_Event& e);
-	void handleMouseButtonDownEvent(SDL_Event& e);
-	void handleMouseButtonUpEvent(SDL_Event& e);
-	void handleSDLQuitEvent(SDL_Event& e);
+	void handleOneTimeEvent(const SceneID::ID sceneID, SDL_Event& e);
+	void handleRealTimeEvent(const SceneID::ID sceneID);
 
 	template<class T>
 	bool addCallback(const SceneID::ID sceneID, const Command::ID& name, void(T::*func)(EventInfo*), T* instance) {
@@ -53,8 +52,8 @@ public:
 
 
 private:
-	Command::ID m_currentCommand;
-	EventInfo * m_currentEvent;
+	void callback(SceneID::ID sceneID, const Command::ID command, EventInfo * eventInfo);
+
 	Bindings m_bindings;
 	Callbacks m_callbacks;
 };

@@ -14,7 +14,8 @@ public:
 	SceneManager();
 	~SceneManager();
 
-	void onEvent(SDL_Event& e);
+	void handleOneTimeEvents(SDL_Event& e);
+	void handleRealTimeEvents();
 	void update();											// Update the current scene
 	void render(SDL_Renderer * renderer);					// Render all scenes on the stack
 
