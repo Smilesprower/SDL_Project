@@ -33,6 +33,7 @@ private:
 	std::vector<std::unique_ptr<Scene>> m_sceneStack;	
 	std::map<SceneID::ID, std::function<std::unique_ptr<Scene>()>> m_sceneFactory;	
 
+	void forceQuit(EventInfo* eventInfo) { clearSceneStack(); };
 	void applyAwaitingChanges();
 	std::unique_ptr<Scene> addScene(SceneID::ID scene);
 

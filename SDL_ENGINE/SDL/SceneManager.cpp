@@ -4,6 +4,7 @@
 
 SceneManager::SceneManager()
 {
+	m_context.eventHandler.addCallback(SceneID::NONE, Command::QUIT, &SceneManager::forceQuit, this);
 }
 
 SceneManager::~SceneManager()

@@ -25,8 +25,8 @@ void GameScene::render(SDL_Renderer* renderer)
 
 void GameScene::onEnter()
 {
-	getContext()->eventHandler.addCallback(SceneID::Game, Command::JUMP, &GameScene::add, this);
-	getContext()->eventHandler.addCallback(SceneID::Game, Command::QUIT, &GameScene::exit, this);
+	getContext()->eventHandler.addCallback(SceneID::Game, Command::BUTTONA, &GameScene::add, this);
+	getContext()->eventHandler.addCallback(SceneID::Game, Command::BUTTONB, &GameScene::exit, this);
 	std::cout << "Entering Game Scene" << std::endl;
 }
 

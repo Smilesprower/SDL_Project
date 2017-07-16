@@ -21,8 +21,8 @@ void TitleScene::render(SDL_Renderer* renderer)
 
 void TitleScene::onEnter()
 {
-	getContext()->eventHandler.addCallback(SceneID::Title, Command::JUMP, &TitleScene::add, this);
-	getContext()->eventHandler.addCallback(SceneID::Title, Command::MOVE, &TitleScene::exit, this);
+	getContext()->eventHandler.addCallback(SceneID::Title, Command::BUTTONA, &TitleScene::add, this);
+	getContext()->eventHandler.addCallback(SceneID::Title, Command::BUTTONB, &TitleScene::exit, this);
 	std::cout << "Entering Title Scene" << std::endl;
 }
 

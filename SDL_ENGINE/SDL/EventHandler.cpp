@@ -12,10 +12,9 @@ EventHandler::EventHandler()
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC);
 	SDL_JoystickEventState(SDL_ENABLE);
 
-	int numberOfJoysticks = SDL_NumJoysticks();
-	for (int i = 0; i < numberOfJoysticks; i++){
-		SDL_Joystick * joypad = SDL_JoystickOpen(i);
-	}
+	UniqueSDL_JoyStick temp;
+	temp.reset(SDL_JoystickOpen(0));
+	m_joySticks.emplace(0, std::pair<UniqueSDL_JoyStick, JoyStickButtons>(std::move(temp), JoyStickButtons{}));
 	loadBindings();
 	//>
 }
@@ -64,9 +63,9 @@ void EventHandler::handleOneTimeEvent(const SceneID::ID sceneID, SDL_Event& e)
 			EventInfo* eventInfo = eventItr.get();
 				switch (e.type) {
 				case SDL_KEYDOWN:
-					if (e.key.keysym.scancode == eventInfo->m_keyCode) {
-						callback(sceneID, bindItr.first, eventInfo);
-					} break;
+				if (e.key.keysym.scancode == eventInfo->m_keyCode) {
+					callback(sceneID, bindItr.first, eventInfo);
+				} break;
 			}
 		}
 	}
@@ -74,17 +73,31 @@ void EventHandler::handleOneTimeEvent(const SceneID::ID sceneID, SDL_Event& e)
 
 void EventHandler::handleRealTimeEvent(const SceneID::ID sceneID)
 {
-	SDL_PumpEvents();
-	auto keyboardState = SDL_GetKeyboardState(nullptr);
-
+	Uint8 joyButtonState;
 	for (auto& bindItr : m_bindings) {
 		for (auto& eventItr : bindItr.second) {
 			EventInfo* eventInfo = eventItr.get();
 			switch (eventInfo->m_eventType) {
-				case RealTimeEvent::KEYBOARD:
-					if (keyboardState[eventInfo->m_keyCode]) {
-						callback(sceneID, bindItr.first, eventInfo);
-					} break;
+				case RealTimeEvent::JOYDPAD:
+				joyButtonState = SDL_JoystickGetHat(m_joySticks[0].first.get(), 0);
+				if (joyButtonState != SDL_HAT_CENTERED) {
+					eventInfo->m_keyCode = joyButtonState;
+					std::cout << (int)joyButtonState << "Repeat Press" << "\n";
+				} break;
+				case RealTimeEvent::JOYBUTTONONCE:
+				joyButtonState = SDL_JoystickGetButton(m_joySticks[0].first.get(), eventInfo->m_keyCode);
+				if (joyButtonState == RealTimeEvent::JOYBUTTONUP) {
+					m_joySticks[0].second.m_buttons[eventInfo->m_keyCode] = RealTimeEvent::JOYBUTTONUP;
+				}
+				else if (joyButtonState != m_joySticks[0].second.m_buttons[eventInfo->m_keyCode]){
+					m_joySticks[0].second.m_buttons[eventInfo->m_keyCode] = RealTimeEvent::JOYBUTTONDOWN;
+					std::cout << eventInfo->m_keyCode << " Press Once" << "\n";
+				} break;
+				case RealTimeEvent::JOYBUTTONREPEAT:
+				joyButtonState = SDL_JoystickGetButton(m_joySticks[0].first.get(), eventInfo->m_keyCode);
+				if (joyButtonState == RealTimeEvent::JOYBUTTONDOWN) {
+					std::cout << eventInfo->m_keyCode << "Repeat Press" << "\n";
+				} break;
 			}
 		}
 	}

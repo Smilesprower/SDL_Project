@@ -5,10 +5,11 @@ namespace Command
 	enum ID
 	{
 		NONE,
-		JUMP,
-		MOVE,
-		MOVEUP,
-		QUIT
+		QUIT,
+		BUTTONA,
+		BUTTONB,
+		BUTTONX,
+		BUTTONY
 	};
 }
 
@@ -36,7 +37,7 @@ namespace SceneID
 {
 	enum ID
 	{
-		None = 0,   // 0 
+		NONE = 0,   // 0 
 		Title, 
 		Game,
 	};

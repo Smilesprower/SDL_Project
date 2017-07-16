@@ -16,7 +16,7 @@ Application::~Application()
 bool Application::initialize()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0){
-		m_window.reset(SDL_CreateWindow("SDL WINDOW ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,800,600, SDL_WINDOW_INPUT_FOCUS));
+		m_window.reset(SDL_CreateWindow("SDL WINDOW ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,400,300, SDL_WINDOW_INPUT_FOCUS));
 		m_renderer.reset(SDL_CreateRenderer(m_window.get(), 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
 		SDL_SetRenderDrawColor(m_renderer.get(), 50, 150, 215, 255);
 		return true;

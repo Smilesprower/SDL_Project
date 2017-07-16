@@ -1,21 +1,26 @@
 #pragma once
-#include <SDL.h>
 #include <unordered_map>
 #include <functional>
 #include <vector>
-#include <memory>
+#include "SDLUnique.h"
 #include "Identifiers.h"
 
 namespace RealTimeEvent
 {
 	enum ID {
-		KEYBOARD = SDL_USEREVENT + 1,
-		MOUSE,
-		JOYSTICKBUTTONS,
-		JOYSTICKJHAT,
-		JOYSTICKANALOG
+		JOYBUTTONUP,
+		JOYBUTTONDOWN,
+		JOYDPAD,
+		JOYANALOG,
+		JOYBUTTONONCE,
+		JOYBUTTONREPEAT,
 	};
 }
+
+struct JoyStickButtons{
+	//Exapand if needed.
+	std::vector<Uint8> m_buttons{ 16,0 };
+};
 
 struct EventInfo {
 	int m_eventType;
@@ -26,7 +31,7 @@ struct EventInfo {
 		, m_keyCode(keyCode)
 	{}
 };
-
+using JoySticks = std::unordered_map<Uint8, std::pair<UniqueSDL_JoyStick, JoyStickButtons>>;
 using CallbackContainer = std::unordered_map<Command::ID, std::function<void(EventInfo*)>>;
 using Callbacks = std::unordered_map<SceneID::ID, CallbackContainer>;
 using Bindings = std::unordered_map<Command::ID, std::vector<std::unique_ptr<EventInfo>>>;
@@ -53,7 +58,7 @@ public:
 
 private:
 	void callback(SceneID::ID sceneID, const Command::ID command, EventInfo * eventInfo);
-
+	JoySticks m_joySticks;
 	Bindings m_bindings;
 	Callbacks m_callbacks;
 };
